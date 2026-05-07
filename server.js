@@ -10,28 +10,28 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// ─── Mobile User-Agent ───
+// 鈹€鈹€鈹€ Mobile User-Agent 鈹€鈹€鈹€
 const MOBILE_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
 
-// ─── Platform Detection ───
+// 鈹€鈹€鈹€ Platform Detection 鈹€鈹€鈹€
 function detectPlatform(url) {
-    if (/douyin|抖音|iesdouyin|v\.douyin/i.test(url)) return 'douyin';
-    if (/kuaishou|快手|v\.kuaishou|v\.kwai|kwai/i.test(url)) return 'kuaishou';
-    if (/xiaohongshu|小红书|xhslink|xhs/i.test(url)) return 'xiaohongshu';
-    if (/bilibili|b站|b23\.tv|bilibili\.com/i.test(url)) return 'bilibili';
+    if (/douyin|鎶栭煶|iesdouyin|v\.douyin/i.test(url)) return 'douyin';
+    if (/kuaishou|蹇墜|v\.kuaishou|v\.kwai|kwai/i.test(url)) return 'kuaishou';
+    if (/xiaohongshu|灏忕孩涔xhslink|xhs/i.test(url)) return 'xiaohongshu';
+    if (/bilibili|b绔檤b23\.tv|bilibili\.com/i.test(url)) return 'bilibili';
     return null;
 }
 
-// ─── Extract clean URL from share text ───
+// 鈹€鈹€鈹€ Extract clean URL from share text 鈹€鈹€鈹€
 function extractUrl(text) {
     const urlMatch = text.match(/https?:\/\/[^\s\u4e00-\u9fff]+/);
     if (urlMatch) {
-        return urlMatch[0].replace(/[，。！？、；：""''）】》]+$/, '');
+        return urlMatch[0].replace(/[锛屻€傦紒锛熴€侊紱锛?"''锛夈€戙€媇+$/, '');
     }
     return text.trim();
 }
 
-// ─── Follow redirects and return final URL ───
+// 鈹€鈹€鈹€ Follow redirects and return final URL 鈹€鈹€鈹€
 async function resolveRedirects(url, maxRedirects = 5) {
     let currentUrl = url;
     for (let i = 0; i < maxRedirects; i++) {
@@ -57,7 +57,7 @@ async function resolveRedirects(url, maxRedirects = 5) {
     return currentUrl;
 }
 
-// ─── Extract video ID from Douyin short URL ───
+// 鈹€鈹€鈹€ Extract video ID from Douyin short URL 鈹€鈹€鈹€
 async function resolveDouyinShortUrl(url) {
     try {
         // Follow all redirects to get the final URL
@@ -75,7 +75,7 @@ async function resolveDouyinShortUrl(url) {
     return null;
 }
 
-// ─── Parse Douyin ───
+// 鈹€鈹€鈹€ Parse Douyin 鈹€鈹€鈹€
 async function parseDouyin(url) {
     // Step 1: Resolve short URL to get video ID
     let videoId = null;
@@ -86,7 +86,7 @@ async function parseDouyin(url) {
         videoId = await resolveDouyinShortUrl(url);
     }
 
-    if (!videoId) throw new Error('无法提取视频ID，请检查链接');
+    if (!videoId) throw new Error('鏃犳硶鎻愬彇瑙嗛ID锛岃妫€鏌ラ摼鎺?);
 
     // Step 2: Fetch video page
     const pageUrl = `https://www.iesdouyin.com/share/video/${videoId}`;
@@ -97,20 +97,20 @@ async function parseDouyin(url) {
 
     // Step 3: Extract _ROUTER_DATA
     const dataMatch = html.match(/window\._ROUTER_DATA\s*=\s*(.*?)<\/script>/s);
-    if (!dataMatch) throw new Error('页面数据解析失败，抖音可能已更新接口');
+    if (!dataMatch) throw new Error('椤甸潰鏁版嵁瑙ｆ瀽澶辫触锛屾姈闊冲彲鑳藉凡鏇存柊鎺ュ彛');
 
     let jsonData;
     try {
         jsonData = JSON.parse(dataMatch[1].trim());
     } catch (e) {
-        throw new Error('JSON 数据解析失败');
+        throw new Error('JSON 鏁版嵁瑙ｆ瀽澶辫触');
     }
 
     // Step 4: Navigate JSON to find video info
     try {
         const loaderData = jsonData.loaderData;
         const pageKey = Object.keys(loaderData).find(k => k.includes('/page'));
-        if (!pageKey) throw new Error('找不到视频数据');
+        if (!pageKey) throw new Error('鎵句笉鍒拌棰戞暟鎹?);
 
         const videoInfo = loaderData[pageKey].videoInfoRes;
         const item = videoInfo.item_list[0];
@@ -129,7 +129,7 @@ async function parseDouyin(url) {
         const musicAuthor = musicInfo.author || '';
 
         return {
-            title: item.desc || '未知标题',
+            title: item.desc || '鏈煡鏍囬',
             author: item.author?.nickname || '',
             cover: videoAddr?.cover?.url_list?.[0] || item.video?.cover?.url_list?.[0] || '',
             video_url: videoUrl,
@@ -139,11 +139,11 @@ async function parseDouyin(url) {
         };
     } catch (e) {
         console.error('Parse douyin data error:', e.message);
-        throw new Error('视频信息提取失败: ' + e.message);
+        throw new Error('瑙嗛淇℃伅鎻愬彇澶辫触: ' + e.message);
     }
 }
 
-// ─── Parse Kuaishou ───
+// 鈹€鈹€鈹€ Parse Kuaishou 鈹€鈹€鈹€
 async function parseKuaishou(url) {
     // Resolve short URL
     let finalUrl = url;
@@ -202,10 +202,10 @@ async function parseKuaishou(url) {
         if (ogImage) cover = ogImage;
     }
 
-    if (!videoUrl) throw new Error('快手视频解析失败，接口可能已更新');
+    if (!videoUrl) throw new Error('蹇墜瑙嗛瑙ｆ瀽澶辫触锛屾帴鍙ｅ彲鑳藉凡鏇存柊');
 
     return {
-        title: title || '快手视频',
+        title: title || '蹇墜瑙嗛',
         author: author || '',
         cover: cover || '',
         video_url: videoUrl,
@@ -213,7 +213,7 @@ async function parseKuaishou(url) {
     };
 }
 
-// ─── Parse Xiaohongshu ───
+// 鈹€鈹€鈹€ Parse Xiaohongshu 鈹€鈹€鈹€
 async function parseXiaohongshu(url) {
     // Resolve short URL
     let finalUrl = url;
@@ -269,10 +269,10 @@ async function parseXiaohongshu(url) {
         if (ogImage) cover = ogImage;
     }
 
-    if (!videoUrl) throw new Error('小红书视频解析失败，可能不是视频笔记或接口已更新');
+    if (!videoUrl) throw new Error('灏忕孩涔﹁棰戣В鏋愬け璐ワ紝鍙兘涓嶆槸瑙嗛绗旇鎴栨帴鍙ｅ凡鏇存柊');
 
     return {
-        title: title || '小红书视频',
+        title: title || '灏忕孩涔﹁棰?,
         author: author || '',
         cover: cover || '',
         video_url: videoUrl,
@@ -280,7 +280,7 @@ async function parseXiaohongshu(url) {
     };
 }
 
-// ─── Parse Bilibili ───
+// 鈹€鈹€鈹€ Parse Bilibili 鈹€鈹€鈹€
 async function parseBilibili(url) {
     // Extract BV ID
     let bvid = '';
@@ -302,7 +302,7 @@ async function parseBilibili(url) {
         } catch (e) { /* ignore */ }
     }
 
-    if (!bvid) throw new Error('无法提取B站视频ID');
+    if (!bvid) throw new Error('鏃犳硶鎻愬彇B绔欒棰慖D');
 
     // Use Bilibili API to get video info
     const apiResp = await fetch(`https://api.bilibili.com/x/web-interface/view?bvid=${bvid}`, {
@@ -313,7 +313,7 @@ async function parseBilibili(url) {
     });
     const apiData = await apiResp.json();
 
-    if (apiData.code !== 0) throw new Error(apiData.message || 'B站API请求失败');
+    if (apiData.code !== 0) throw new Error(apiData.message || 'B绔橝PI璇锋眰澶辫触');
 
     const data = apiData.data;
     const cid = data.cid;
@@ -345,7 +345,7 @@ async function parseBilibili(url) {
     }
 
     return {
-        title: data.title || 'B站视频',
+        title: data.title || 'B绔欒棰?,
         author: data.owner?.name || '',
         cover: data.pic || '',
         video_url: videoUrl,
@@ -353,12 +353,12 @@ async function parseBilibili(url) {
     };
 }
 
-// ─── Main Parse API ───
+// 鈹€鈹€鈹€ Main Parse API 鈹€鈹€鈹€
 app.post('/api/parse', async (req, res) => {
     let { url, platform } = req.body;
 
     if (!url) {
-        return res.json({ code: -1, msg: '请提供视频链接' });
+        return res.json({ code: -1, msg: '璇锋彁渚涜棰戦摼鎺? });
     }
 
     // Extract clean URL from share text
@@ -366,7 +366,7 @@ app.post('/api/parse', async (req, res) => {
 
     const detectedPlatform = platform || detectPlatform(url);
     if (!detectedPlatform) {
-        return res.json({ code: -1, msg: '无法识别平台，请手动选择或检查链接' });
+        return res.json({ code: -1, msg: '鏃犳硶璇嗗埆骞冲彴锛岃鎵嬪姩閫夋嫨鎴栨鏌ラ摼鎺? });
     }
 
     console.log(`[Parse] Platform: ${detectedPlatform}, URL: ${url}`);
@@ -387,7 +387,7 @@ app.post('/api/parse', async (req, res) => {
                 result = await parseBilibili(url);
                 break;
             default:
-                return res.json({ code: -1, msg: '不支持的平台' });
+                return res.json({ code: -1, msg: '涓嶆敮鎸佺殑骞冲彴' });
         }
 
         console.log(`[Parse] Success: ${result.title}`);
@@ -398,10 +398,10 @@ app.post('/api/parse', async (req, res) => {
     }
 });
 
-// ─── Download proxy ───
+// 鈹€鈹€鈹€ Download proxy 鈹€鈹€鈹€
 app.get('/api/download', async (req, res) => {
     const { url, filename, type } = req.query;
-    if (!url) return res.status(400).json({ code: -1, msg: '缺少 url 参数' });
+    if (!url) return res.status(400).json({ code: -1, msg: '缂哄皯 url 鍙傛暟' });
 
     try {
         const decodedUrl = decodeURIComponent(url);
@@ -434,7 +434,7 @@ app.get('/api/download', async (req, res) => {
         }
 
         if (!resp || (!resp.ok && resp.status !== 206)) {
-            return res.status(502).json({ code: -1, msg: `下载失败: HTTP ${resp?.status}` });
+            return res.status(502).json({ code: -1, msg: `涓嬭浇澶辫触: HTTP ${resp?.status}` });
         }
 
         const contentType = resp.headers.get('content-type') || (isAudio ? 'audio/mpeg' : 'video/mp4');
@@ -457,18 +457,18 @@ app.get('/api/download', async (req, res) => {
         console.log(`[Download] Sent ${(buffer.length / 1024 / 1024).toFixed(1)} MB`);
     } catch (err) {
         console.error('[Download] Error:', err.message);
-        res.status(500).json({ code: -1, msg: '下载失败: ' + err.message });
+        res.status(500).json({ code: -1, msg: '涓嬭浇澶辫触: ' + err.message });
     }
 });
 
-// ─── Batch download (ZIP) ───
+// 鈹€鈹€鈹€ Batch download (ZIP) 鈹€鈹€鈹€
 app.post('/api/batch-download', async (req, res) => {
     const { urls } = req.body;
     if (!Array.isArray(urls) || urls.length === 0) {
-        return res.json({ code: -1, msg: '请提供链接列表' });
+        return res.json({ code: -1, msg: '璇锋彁渚涢摼鎺ュ垪琛? });
     }
     if (urls.length > 20) {
-        return res.json({ code: -1, msg: '最多支持 20 个链接批量下载' });
+        return res.json({ code: -1, msg: '鏈€澶氭敮鎸?20 涓摼鎺ユ壒閲忎笅杞? });
     }
 
     console.log(`[Batch] Processing ${urls.length} URLs...`);
@@ -525,17 +525,22 @@ app.post('/api/batch-download', async (req, res) => {
     } catch (err) {
         console.error('[Batch] Archive error:', err.message);
         if (!res.headersSent) {
-            res.status(500).json({ code: -1, msg: '打包失败: ' + err.message });
+            res.status(500).json({ code: -1, msg: '鎵撳寘澶辫触: ' + err.message });
         }
     }
 });
 
-// ─── Health check ───
+// 鈹€鈹€鈹€ Health check 鈹€鈹€鈹€
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: Date.now() });
 });
 
-// ─── Serve static files (frontend) ───
+// Root health check (for Railway / Render etc.)
+app.get('/', (req, res) => {
+    res.json({ status: 'ok', service: 'videolens-api' });
+});
+
+// 鈹€鈹€鈹€ Serve static files (frontend) 鈹€鈹€鈹€
 // Copy index.html to public/ for serving
 const fs = require('fs');
 const path = require('path');
@@ -552,10 +557,7 @@ if (fs.existsSync(sourceIndex) && !fs.existsSync(publicIndex)) {
 
 app.listen(PORT, () => {
     console.log(`
-  ╔══════════════════════════════════════╗
-  ║   VideoLens Server Running          ║
-  ║   http://localhost:${PORT}            ║
-  ║   API: http://localhost:${PORT}/api/parse ║
-  ╚══════════════════════════════════════╝
+  鈺斺晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晽
+  鈺?  VideoLens Server Running          鈺?  鈺?  http://localhost:${PORT}            鈺?  鈺?  API: http://localhost:${PORT}/api/parse 鈺?  鈺氣晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨暆
     `);
 });
