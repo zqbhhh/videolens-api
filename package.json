@@ -1,11 +1,14 @@
 {
   "name": "videolens-server",
   "version": "1.0.0",
-  "description": "VideoLens - 短视频无水印解析后端服务",
+  "description": "VideoLens - 鐭棰戞棤姘村嵃瑙ｆ瀽鍚庣鏈嶅姟",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   },
   "dependencies": {
     "archiver": "^7.0.1",
